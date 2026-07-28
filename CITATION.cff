@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+message: "If you use this repository, please cite the accompanying article and this repository."
+title: "Global Artificial Intelligence Adoption Survey: Perceptions of Public Sector Employees in Denmark"
+type: dataset
+authors:
+  - family-names: Saad
+    given-names: Reem
+    affiliation: "Department of Drug Design and Pharmacology, University of Copenhagen, Denmark"
+  - family-names: Saifuddin
+    given-names: Khalid
+    affiliation: "Department of Applied Mathematics and Computer Science, Technical University of Denmark, Lyngby, Denmark"
+  - family-names: Thomsen
+    given-names: Kenneth Græbild
+    affiliation: "Department of Dermatology and Venereology, Aarhus University Hospital; Institute for Clinical Medicine, Aarhus University, Denmark"
+  - family-names: Sessa
+    given-names: Maurizio
+    orcid: "https://orcid.org/0000-0003-0874-4744"
+    affiliation: "Department of Drug Design and Pharmacology, University of Copenhagen, Denmark"
+    email: maurizio.sessa@sund.ku.dk
+keywords:
+  - Artificial Intelligence
+  - Public Administration
+  - Adoption
+  - Perception
+  - Survey
+  - Denmark
+license: MIT
