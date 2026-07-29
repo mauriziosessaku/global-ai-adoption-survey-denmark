@@ -1,40 +1,5 @@
-# =============================================================================
-# Global Artificial Intelligence Adoption Survey
-# Perceptions of Public Sector Employees in Denmark
-#
-# Reproducible analysis pipeline
-# -----------------------------------------------------------------------------
-# HOW TO RUN
-#   1. Open this repository as the working directory (open the folder in
-#      RStudio, or run  setwd("/path/to/global-ai-adoption-survey-denmark") ).
-#   2. Source this script:  source("analysis/global_ai_adoption_survey_denmark.R")
-#
-# All input is read from   data/    and all output is written to
-#   output/figures/  (PNG figures)  and  output/tables/  (Table 1 .xlsx).
-# Tested with R 4.5.2. Original author: Reem Saad. Paths made
-# repository-relative for public release; analysis logic is unchanged.
-# =============================================================================
 
-# --- Package bootstrap -------------------------------------------------------
-# Installs only the packages that are missing, then loads them.
-.required_pkgs <- c(
-  "readxl", "table1", "skimr", "dplyr", "gtsummary", "ggplot2", "stringr",
-  "tidyr", "psych", "openxlsx", "tibble", "forcats", "ggh4x", "patchwork"
-)
-.missing_pkgs <- .required_pkgs[!.required_pkgs %in% rownames(installed.packages())]
-if (length(.missing_pkgs) > 0) {
-  install.packages(.missing_pkgs, repos = "https://cloud.r-project.org")
-}
-
-# --- Output directories ------------------------------------------------------
-dir.create(file.path("output", "figures"), recursive = TRUE, showWarnings = FALSE)
-dir.create(file.path("output", "tables"),  recursive = TRUE, showWarnings = FALSE)
-
-
-# Github: https://cran.r-project.org/web/packages/table1/vignettes/table1-examples.html
-
-# Loading libraries -------------------------------------------------------
-
+# Load libraries -------------------------------------------------------
 
 
 library(readxl)
@@ -58,10 +23,10 @@ library(ggh4x)
 
 ##Load the Denmark_Dataset Data and check variables
 
-Denmark_Dataset <- read_excel(file.path("data", "Denmark_Dataset.xlsx"))
+Denmark_Dataset <- read_excel("Denmark_Dataset.xlsx")
 
 # View data, names and missing values
-# View(Denmark_Dataset)
+View(Denmark_Dataset)
 
 head(Denmark_Dataset)
 
@@ -285,7 +250,7 @@ Denmark_Comparison <- subset(
   USAGE != "I don't know"
 )
 
-# View(Denmark_Comparison)
+View(Denmark_Comparison)
 
 
 
@@ -533,23 +498,6 @@ tableOne_modified
 
 
 
-#### OPTIONAL!! and remeber if its table modified or not??#####
-
-# Convert to exportable dataframe
-tableOne_df <- as_tibble(tableOne)
-
-# View(tableOne_df)
-
-# Export
-write.xlsx(
-  tableOne_df,
-  file = "output/tables/Table_1_Sociodemographic_Characteristics.xlsx",
-  asTable = TRUE,
-  colWidths = "auto"
-)
-
-
-
 # =======================================================================================
 # 0. Data preparation - SECTION 2-11 + NON-USERS’ PERSPECTIVES + GENERAL REFLECTIONS
 # =======================================================================================
@@ -559,7 +507,7 @@ write.xlsx(
 
 Data_all_sections <- Denmark_Comparison
 
-# View(Data_all_sections)
+View(Data_all_sections)
 
 ## Change the labels from Qx to survey items
 
@@ -717,7 +665,7 @@ Data_all_sections <- Data_all_sections %>%
   )
 
 
-# View(Data_all_sections)
+View(Data_all_sections)
 
 
 ##  Recode categorical variables according to the codebook and convert them to factors
@@ -746,7 +694,6 @@ Data_all_sections$"To what extent is the use of AI tools expected in your work?"
 )
 
 
-## https://dplyr.tidyverse.org/reference/across.html 
 
 # Part 1: Group all categorical variables that has the same level and variable name in the same group. 
 # Leave open text and the once  since they have different names
@@ -942,7 +889,7 @@ Data_all_sections <- Data_all_sections %>%
 
 # Save the final data set "Data_all_sections" which can then be loaded anytime
 
-save(Data_all_sections, file = file.path("output", "Data_all_sections.RData"))
+save(Data_all_sections, file = "Data_all_sections.RData")
 
 
 
@@ -1131,17 +1078,6 @@ p_government_compare <- ggplot(
   )
 
 p_government_compare
-
-
-# Save the figure as PNG
-ggsave(
-  filename = "output/figures/p_government_compare_figure.png",
-  plot = p_government_compare,
-  width = 5,
-  height = 5,
-  dpi = 1200
-)
-
 
 
 
@@ -1334,17 +1270,6 @@ p_sex_compare <- ggplot(
   )
 
 p_sex_compare
-
-
-# Save the figure as PNG
-ggsave(
-  filename = "output/figures/p_sex_compare_figure.png",
-  plot = p_sex_compare,
-  width = 6,
-  height = 4,
-  dpi = 1200
-)
-
 
 
 
@@ -1558,22 +1483,6 @@ p_domain_compare
 
 
 
-# Save the figure as PNG
-ggsave(
-  filename = "output/figures/p_domain_compare_figure.png",
-  plot = p_domain_compare,
-  width = 7,
-  height = 5,
-  dpi = 1200
-)
-
-
-
-### WITH DATA ####
-
-p_government_no_values <- p_government_compare
-p_sex_no_values <- p_sex_compare
-p_domain_no_values <- p_domain_compare
 
 
 # ============================================================
@@ -1862,305 +1771,14 @@ combined_figure_rep <- (
 combined_figure_rep
 
 
-# Save the figure as PNG
-ggsave(
-  filename = "output/figures/WITH_combined_figure_rep_figure.png",
-  plot = combined_figure_rep,
-  width = 15,
-  height = 4,
-  dpi = 1200
-)
 
 
-
-
-
-
-#### Combine Panal A + B + C ####
+## ----------------------------------------------------------------------------
 
 # ============================================================
-# 1. Create panel-specific copies
-#    The original plots remain unchanged:
-#    p_government_compare
-#    p_sex_compare
-#    p_domain_compare
+#  Coverage --> respondents 
 # ============================================================
 
-
-# Remove the geom_text layer from each original plot
-p_government_no_values <- p_government_compare
-p_government_no_values$layers[[2]] <- NULL
-
-p_sex_no_values <- p_sex_compare
-p_sex_no_values$layers[[2]] <- NULL
-
-p_domain_no_values <- p_domain_compare
-p_domain_no_values$layers[[2]] <- NULL
-
-
-
-# Shared axis theme
-
-clean_axis_theme <- theme(
-  axis.line.x = element_line(
-    colour = "black",
-    linewidth = 0.35
-  ),
-  axis.line.y = element_line(
-    colour = "black",
-    linewidth = 0.35
-  ),
-  axis.ticks.x = element_line(
-    colour = "black",
-    linewidth = 0.35
-  ),
-  axis.ticks.y = element_line(
-    colour = "black",
-    linewidth = 0.35
-  ),
-  axis.ticks.length = unit(
-    0.10,
-    "cm"
-  ),
-  axis.text.y = element_text(
-    family = "sans",
-    colour = "black",
-    size = 9
-  ),
-  axis.title.y = element_blank()
-)
-
-
-
-# ------------------------------------------------------------
-# Panel A: Level of government
-# Remove y-axis title and numeric labels, except 0
-# ------------------------------------------------------------
-
-p_government_panel_updated <- p_government_no_values +
-  labs(
-    title = "Level of government",
-    subtitle = NULL,
-    x = NULL,
-    y = NULL,
-    fill = NULL
-  ) +
-  scale_y_continuous(
-    limits = c(0, 65),
-    breaks = seq(
-      0,
-      60,
-      by = 20
-    ),
-    labels = function(x) {
-      ifelse(x == 0, "0", "")
-    },
-    expand = expansion(
-      mult = c(0, 0)
-    )
-  ) +
-  clean_axis_theme +
-  theme(
-    plot.title = element_text(
-      family = "sans",
-      face = "bold",
-      hjust = 0.5,
-      size = 12
-    ),
-    
-    axis.text.x = element_text(
-      family = "sans",
-      colour = "black",
-      size = 11,
-      margin = margin(t = 7)
-    ),
-    
-    legend.position = c(0.62, 0.98),
-    legend.justification = c(0, 1),
-    legend.direction = "vertical",
-    legend.background = element_blank(),
-    legend.key.size = unit(0.35, "cm"),
-    legend.text = element_text(
-      family = "sans",
-      size = 11
-    ),
-    legend.title = element_blank(),
-    
-    # Extra space on the right separates A from B
-    plot.margin = margin(
-      t = 5,
-      r = 14,
-      b = 5,
-      l = 5
-    )
-  )
-
-# ------------------------------------------------------------
-# Panel B: Sex
-# Remove y-axis title and numeric labels, except 0
-# ------------------------------------------------------------
-
-p_sex_panel_updated <- p_sex_no_values +
-  labs(
-    title = "Sex",
-    subtitle = NULL,
-    x = NULL,
-    y = NULL,
-    fill = NULL
-  ) +
-  guides(
-    fill = "none"
-  ) +
-  scale_y_continuous(
-    limits = c(0, 100),
-    breaks = seq(
-      0,
-      100,
-      by = 20
-    ),
-    labels = function(x) {
-      ifelse(x == 0, "0", "")
-    },
-    expand = expansion(
-      mult = c(0, 0)
-    )
-  ) +
-  clean_axis_theme +
-  theme(
-    plot.title = element_text(
-      family = "sans",
-      face = "bold",
-      hjust = 0.5,
-      size = 12
-    ),
-    
-    axis.text.x = element_text(
-      family = "sans",
-      colour = "black",
-      size = 11,
-      margin = margin(t = 7)
-    ),
-    
-    # Space on both sides keeps B visually separate
-    plot.margin = margin(
-      t = 5,
-      r = 10,
-      b = 5,
-      l = 8
-    )
-  )
-
-
-# ------------------------------------------------------------
-# Panel C: Domain
-# Remove y-axis title and numeric labels, except 0
-# ------------------------------------------------------------
-
-p_domain_panel_updated <- p_domain_no_values +
-  labs(
-    title = "Domain (vs. COFOG spending share)",
-    subtitle = NULL,
-    x = NULL,
-    y = NULL,
-    fill = NULL
-  ) +
-  guides(
-    fill = "none"
-  ) +
-  scale_y_continuous(
-    limits = c(0, 65),
-    breaks = seq(
-      0,
-      60,
-      by = 20
-    ),
-    labels = function(x) {
-      ifelse(x == 0, "0", "")
-    },
-    expand = expansion(
-      mult = c(0, 0)
-    )
-  ) +
-  scale_x_discrete(
-    labels = function(x) {
-      stringr::str_wrap(
-        x,
-        width = 15
-      )
-    }
-  ) +
-  clean_axis_theme +
-  theme(
-    plot.title = element_text(
-      family = "sans",
-      face = "bold",
-      hjust = 0.5,
-      size = 12
-    ),
-    
-    axis.text.x = element_text(
-      family = "sans",
-      colour = "black",
-      size = 11,
-      angle = 0,
-      hjust = 0.5,
-      vjust = 1,
-      lineheight = 0.9,
-      margin = margin(t = 7)
-    ),
-    
-    # Extra space on the left separates C from B
-    plot.margin = margin(
-      t = 5,
-      r = 5,
-      b = 5,
-      l = 8
-    )
-  )
-
-
-# ============================================================
-# 2. Combine the three panels
-# ============================================================
-
-combined_figure_rep_without <- (
-  p_government_panel_updated |
-    p_sex_panel_updated |
-    p_domain_panel_updated
-) +
-  plot_layout(
-    widths = c(0.82, 0.82, 1.28)
-  ) +
-  plot_annotation(
-    tag_levels = "A"
-  ) &
-  theme(
-    plot.tag = element_text(
-      family = "sans",
-      face = "bold",
-      size = 12
-    ),
-    plot.tag.position = c(0, 1)
-  )
-
-
-combined_figure_rep_without
-
-
-# Save the figure as PNG
-ggsave(
-  filename = "output/figures/combined_figure_rep_figure.png",
-  plot = combined_figure_rep_without,
-  width = 14.5,
-  height = 4,
-  dpi = 1200
-)
-
-
-
-
-
-#####################################################################################
 
 organization_lookup <- tribble(
   ~Organization_clean,                                      ~Domain_from_org,
@@ -2377,118 +1995,6 @@ p_coverage
 
 
 
-# Save the figure as PNG
-ggsave(
-  filename = "output/figures/overall_figure.png",
-  plot = p_coverage,
-  width = 7,
-  height = 4,
-  dpi = 1200
-)
-
-
-#### EXTRA: NO COUNT OR % ########
-
-
-p_coverage_without <- ggplot(
-  coverage,
-  aes(x = Coverage, y = Domain)
-) +
-  geom_col(
-    width = 0.58,
-    fill = "#4C72B0"
-  ) +
-  geom_vline(
-    xintercept = overall,
-    linetype = "22",
-    linewidth = 0.22,
-    colour = "red",
-    alpha = 0.7
-  ) +
-  annotate(
-    "text",
-    x = overall,
-    y = Inf,
-    label = sprintf(
-      "Overall coverage: %.1f%%",
-      overall
-    ),
-    colour = "red",
-    size = 3.5,
-    vjust = -0.9
-  ) +
-  scale_x_continuous(
-    limits = c(
-      0,
-      max(coverage$Coverage) * 1.18
-    ),
-    breaks = seq(
-      0,
-      ceiling(max(coverage$Coverage) * 1.18),
-      by = 2
-    ),
-    labels = NULL,
-    expand = expansion(mult = c(0, 0))
-  ) +
-  labs(
-    title = "Response Coverage by Domain",
-    subtitle = paste0(
-      "Based on ",
-      total_organizations,
-      " unique responding organizations"
-    ),
-    x = "Response coverage (%)",
-    y = NULL
-  ) +
-  theme_minimal(base_size = 11) +
-  theme(
-    plot.title = element_text(
-      face = "bold",
-      size = 15,
-      margin = margin(b = 5)
-    ),
-    plot.subtitle = element_text(
-      size = 10.5,
-      colour = "grey35",
-      margin = margin(b = 28)
-    ),
-    axis.text.y = element_text(
-      colour = "black",
-      size = 10
-    ),
-    axis.text.x = element_blank(),
-    axis.ticks.x = element_blank(),
-    axis.title.x = element_text(
-      hjust = 0.35,   # moves title left
-      size = 10.5,
-      margin = margin(t = 8)
-    ),
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(),
-    plot.margin = margin(
-      t = 24,
-      r = 35,
-      b = 12,
-      l = 12
-    )
-  ) +
-  coord_cartesian(
-    clip = "off"
-  )
-
-p_coverage_without
-
-
-# Save the figure as PNG
-ggsave(
-  filename = "output/figures/p_coverage_without.png",
-  plot = p_coverage_without,
-  width = 7,
-  height = 4,
-  dpi = 1200
-)
-
-
 
 
 
@@ -2496,7 +2002,6 @@ ggsave(
 # 1.1 Data analysis - SECTION 2-11 + NON-USERS’ PERSPECTIVES + GENERAL REFLECTIONS
 # =======================================================================================
 
-# Source: https://r-graph-gallery.com/ + https://ggplot2.tidyverse.org/ 
 
 ## Step 1 (AI tools used): Create Horizontal bar chart Ordered by frequency
 
@@ -2643,128 +2148,9 @@ p <- ggplot(
 p
 
 
-# Save the figure as PNG
-ggsave(
-  filename = "output/figures/ai_tools_figure.png",
-  plot = p,
-  width = 8,
-  height = 5,
-  units = "in",
-  dpi = 1200
-)
-
-
-
-#### EXTRA: WITHOUT COUNT AND % ####
-
-tool_df2 <- tool_df %>%
-  mutate(
-    tool = c(
-      "Chatbots & AI assistants",
-      "Knowledge management",
-      "Task automation",
-      "Digital assistants",
-      "Person recognition",
-      "Cybersecurity",
-      "Speech analysis",
-      "Recommendation systems",
-      "Prediction and forecasting",
-      "Smart robots",
-      "Other"
-    )
-  ) %>%
-  arrange(desc(count)) %>%
-  mutate(
-    tool = factor(tool, levels = rev(tool))
-  )
-
-
-
-## Plot (horizontal)
-p_without <- ggplot(
-  tool_df2,
-  aes(
-    x = count,
-    y = tool
-  )
-) +
-  geom_col(
-    width = 0.85,
-    fill = "#4C72B0",
-    show.legend = FALSE
-  ) +
-  
-  scale_x_continuous(
-    limits = c(0, 55),
-    breaks = seq(0, 50, 10),
-    expand = c(0, 0)
-  ) +
-  
-  labs(
-    title = "AI tool types used",
-    x = "Number of respondents",
-    y = NULL
-  ) +
-  
-  theme_classic(
-    base_size = 9,
-    base_family = "sans"
-  ) +
-  
-  theme(
-    plot.title = element_text(
-      size = 11,
-      face = "bold",
-      hjust = 0.5,
-      margin = margin(b = 10)
-    ),
-    
-    axis.text.y = element_text(
-      size = 10,
-      colour = "black",
-      margin = margin(r = 8)
-    ),
-    
-    axis.text.x = element_text(
-      size = 10,
-      colour = "black"
-    ),
-    
-    axis.title.x = element_text(
-      size = 10,
-      colour = "black",
-      margin = margin(t = 8)
-    ),
-    
-    axis.title.y = element_blank(),
-    
-    axis.line = element_line(
-      colour = "black",
-      linewidth = 0.50
-    ),
-    
-    axis.ticks = element_line(
-      colour = "black",
-      linewidth = 0.50
-    ),
-    
-    panel.grid = element_blank(),
-    
-    plot.margin = margin(
-      t = 8,
-      r = 0,
-      b = 8,
-      l = 8
-    )
-  )
-
-p_without
-
 
 ## ----------------------------------------------------------------------------
 
-
-# Source: https://r-graph-gallery.com/ 
 
 ## Step 2 (Frequency of AI use): Create ordered bar chart/diverging stacked bar when comparing groups
 
@@ -2924,114 +2310,6 @@ p2 <- ggplot(
 p2
 
 
-# Save the figure as PNG
-ggsave(
-  filename = "output/figures/Frequency_of_AI_use_figure.png",
-  plot = p2,
-  width = 4,
-  height = 4,
-  units = "in",
-  dpi = 1200
-)
-
-
-
-
-#### EXTRA: WITHOUT COUNT AND % ####
-
-# Plot
-p2_without <- ggplot(
-  freq_df,
-  aes(
-    x = frequency,
-    y = n,
-    fill = n
-  )
-) +
-  
-  geom_col(
-    width = 0.60,
-    show.legend = FALSE
-  ) +
-  geom_col(
-    width = 0.85,
-    fill = "#4C72B0",
-    show.legend = FALSE
-  ) +
-  
-  scale_x_discrete(
-    labels = function(x) str_wrap(x, width = 15),
-    expand = expansion(mult = c(0.02, 0.02))
-  ) +
-  
-  scale_y_continuous(
-    limits = c(0, 18),
-    breaks = seq(0, 18, 2),
-    expand = expansion(mult = c(0, 0.01))
-  ) +
-  
-  labs(
-    title = "Frequency of AI use",
-    x = NULL,
-    y = "Respondents"
-  ) +
-  
-  theme_classic(
-    base_size = 9,
-    base_family = "sans"
-  ) +
-  
-  theme(
-    plot.title = element_text(
-      size = 11,
-      face = "bold",
-      hjust = 0.5,
-      margin = margin(b = 6)
-    ),
-    
-    axis.text.x = element_text(
-      size = 10,
-      colour = "black",
-      angle = 0,
-      hjust = 0.5,
-      margin = margin(t = 4)
-    ),
-    
-    axis.text.y = element_text(
-      size = 10,
-      colour = "black"
-    ),
-    
-    axis.title.y = element_text(
-      size = 10,
-      margin = margin(r = 8)
-    ),
-    
-    axis.title.x = element_blank(),
-    
-    axis.line = element_line(
-      colour = "black",
-      linewidth = 0.4
-    ),
-    
-    axis.ticks = element_line(
-      colour = "black",
-      linewidth = 0.35
-    ),
-    
-    panel.grid = element_blank(),
-    
-    plot.margin = margin(
-      t = 8,
-      r = 8,
-      b = 8,
-      l = 2
-    )
-  )
-
-p2_without
-
-
 
 
 ## ----------------------------------------------------------------------------
@@ -3160,107 +2438,6 @@ p3
 
 
 
-# Save the figure as PNG
-ggsave(
-  filename = "output/figures/Self-rated_experience_figure.png",
-  plot = p3,
-  width = 4,
-  height = 4,
-  units = "in",
-  dpi = 1200
-)
-
-
-
-#### EXTRA: WITHOUT COUNT AND % ####
-
-# Plot
-
-p3_without <- ggplot(
-  self_df,
-  aes(
-    x = experience,
-    y = n
-  )
-) +
-  geom_col(
-    width = 0.85,
-    fill = "#4C72B0",
-    show.legend = FALSE
-  ) +
-  scale_x_discrete(
-    drop = TRUE,
-    labels = function(x) stringr::str_wrap(x, width = 15),
-    expand = expansion(mult = c(0.05, 0.05))
-  ) +
-  
-  scale_y_continuous(
-    limits = c(0, 31),
-    breaks = seq(0, 30, 5),
-    expand = expansion(mult = c(0, 0.02))
-  ) +
-  
-  labs(
-    title = "Self-rated experience",
-    x = NULL,
-    y = "Respondents"
-  ) +
-  
-  theme_classic(
-    base_size = 9,
-    base_family = "sans"
-  ) +
-  
-  theme(
-    plot.title = element_text(
-      size = 11,
-      face = "bold",
-      hjust = 0.5,
-      margin = margin(b = 6)
-    ),
-    
-    axis.text.x = element_text(
-      size = 10,
-      colour = "black",
-      angle = 0,
-      hjust = 0.5,
-      margin = margin(t = 4)
-    ),
-    
-    axis.text.y = element_text(
-      size = 10,
-      colour = "black"
-    ),
-    
-    axis.title.y = element_text(
-      size = 10,
-      margin = margin(r = 8)
-    ),
-    
-    axis.title.x = element_blank(),
-    
-    axis.line = element_line(
-      colour = "black",
-      linewidth = 0.5
-    ),
-    
-    axis.ticks = element_line(
-      colour = "black",
-      linewidth = 0.4
-    ),
-    
-    panel.grid = element_blank(),
-    
-    plot.margin = margin(
-      t = 5,
-      r = 5,
-      b = 5,
-      l = 5
-    )
-  )
-
-p3_without
-
 
 #### STORE INTO 1 PANEL OF A, B AND C ####
 
@@ -3324,10 +2501,6 @@ p3 <- p3 +
   )
 
 
-
-
-
-
 combined_plot <- (
   p |
     plot_spacer() |
@@ -3357,134 +2530,11 @@ combined_plot <- (
 combined_plot
 
 
-# Save the figure as PNG
-ggsave(
-  filename = "output/figures/Combined_plot_figure.png",
-  plot = combined_plot,
-  width = 14,
-  height = 4.5,
-  units = "in",
-  dpi = 1200
-)
 
-
-
-#### EXTRA: WITHOUT COUNT AND % ####
-
-# ============================================================
-# Panel A: keep ticks, show only 0
-# ============================================================
-
-p_without_updated <- p_without +
-  scale_x_continuous(
-    limits = c(0, 55),
-    breaks = seq(0, 50, 10),
-    labels = function(x) ifelse(x == 0, "0", ""),
-    expand = c(0, 0)
-  )
-
-# ============================================================
-# Panel B: keep ticks, show only 0
-# ============================================================
-
-p2_without_updated <- p2_without +
-  scale_y_continuous(
-    breaks = seq(0, 18, 2),
-    labels = function(x) ifelse(x == 0, "0", ""),
-    expand = expansion(mult = c(0, 0))
-  ) +
-  theme(
-    axis.ticks.y = element_line(
-      colour = "black",
-      linewidth = 0.5
-    ),
-    axis.ticks.length.y = unit(0.12, "cm"),
-    axis.text.y = element_text(
-      colour = "black",
-      size = 9
-    ),
-    axis.line.y = element_line(
-      colour = "black",
-      linewidth = 0.5
-    ),
-    axis.line.x = element_line(
-      colour = "black",
-      linewidth = 0.5
-    )
-  )
-
-
-# ============================================================
-# Panel C: keep ticks, show only 0
-# ============================================================
-
-p3_without_updated <- p3_without +
-  scale_y_continuous(
-    breaks = seq(0, 30, 5),
-    labels = function(x) ifelse(x == 0, "0", ""),
-    expand = expansion(mult = c(0, 0))
-  ) +
-  theme(
-    axis.ticks.y = element_line(
-      colour = "black",
-      linewidth = 0.5
-    ),
-    axis.ticks.length.y = unit(0.12, "cm"),
-    axis.text.y = element_text(
-      colour = "black",
-      size = 9
-    ),
-    axis.line.y = element_line(
-      colour = "black",
-      linewidth = 0.5
-    ),
-    axis.line.x = element_line(
-      colour = "black",
-      linewidth = 0.5
-    )
-  )
-
-# ============================================================
-# Combine the updated plots
-# ============================================================
-
-combined_plot_without <-
-  (
-    p_without_updated +
-      p2_without_updated +
-      p3_without_updated
-  ) +
-  plot_layout(
-    widths = c(1.1, 1, 1)
-  ) +
-  plot_annotation(
-    tag_levels = "A"
-  ) &
-  theme(
-    plot.tag = element_text(
-      size = 12,
-      face = "bold"
-    )
-  )
-
-
-combined_plot_without
-
-# Save the figure as PNG
-ggsave(
-  filename = "output/figures/without_Combined_plot_figure.png",
-  plot = combined_plot_without,
-  width = 14,
-  height = 4.5,
-  units = "in",
-  dpi = 1200
-)
 
 
 ## ----------------------------------------------------------------------------
 
-
-# Source: https://r-graph-gallery.com/ 
 
 ## Step 4 (SECTION 3: USAGE PATTERNS): Create a stacked bar chart
 
@@ -3756,22 +2806,11 @@ future_plot <- make_plot(
 future_plot
 
 
-# Save the figure as PNG
-ggsave(
-  filename = "output/figures/future_plot_figure.png",
-  plot = future_plot,
-  width = 10,
-  height = 4,
-  units = "in",
-  dpi = 1200
-)
 
 
 
 ## ----------------------------------------------------------------------------
 
-
-# Source: https://r-graph-gallery.com/ 
 
 ## Step 4 (SECTION 4: WORK PERFORMANCE): Create a stacked bar chart
 
@@ -3882,27 +2921,15 @@ performance_plot <- make_plot(
 performance_plot
 
 
-# Save the figure as PNG
-ggsave(
-  filename = "output/figures/performance_plot_figure.png",
-  plot = performance_plot,
-  width = 10,
-  height = 4,
-  units = "in",
-  dpi = 1200
-)
-
 
 
 ## ----------------------------------------------------------------------------
 
 
-# Source: https://r-graph-gallery.com/ 
-
 ## Step 5 (SECTION 5: LEARNING AND INTERACTION): Create a stacked bar chart
 
 
-# 1. Select ethical concern questions ----------------------xxxxxxxx---------------
+# 1. Select ethical concern questions -------------------------------------
 
 learning <- Data_all_sections %>%
   filter(AI_user == "User") %>%
@@ -4243,31 +3270,10 @@ learning_support_plot
 
 
 
-# Save the figure as PNG
-ggsave(
-  filename = "output/figures/confidence_plot_plot_figure.png",
-  plot = confidence_plot,
-  width = 10,
-  height = 4,
-  units = "in",
-  dpi = 1200
-)
-
-ggsave(
-  filename = "output/figures/learning_support_plot_figure.png",
-  plot = learning_support_plot,
-  width = 11,
-  height = 4.5,
-  units = "in",
-  dpi = 1200
-)
-
 
 
 ## ----------------------------------------------------------------------------
 
-
-# Source: https://r-graph-gallery.com/ 
 
 ## Step 6 ( ETHICAL CONSIDERATIONS AND CONCERNS): Create a stacked bar chart
 
@@ -4471,26 +3477,6 @@ privacy_data_plot <- make_plot_long(
 privacy_data_plot
 
 
-
-
-# 12. Save the figure as PNG -----------------------------------------------
-ggsave(
-  filename = "output/figures/trust_accuracy_plot_figure.png",
-  plot = trust_accuracy_plot,
-  width = 10,
-  height = 4.5,
-  units = "in",
-  dpi = 1200
-)
-
-ggsave(
-  filename = "output/figures/privacy_data_plot_figure.png",
-  plot = privacy_data_plot,
-  width = 11,
-  height = 5,
-  units = "in",
-  dpi = 1200
-)
 
 
 # 1. Select ethical concern questions -------------------------------------
@@ -4703,33 +3689,8 @@ plot_workplace
 
 
 
-# 13. Save the figure as PNG ----------------------------------------------
-
-ggsave(
-  filename = "output/figures/plot_societal_figure.png",
-  plot = plot_societal,
-  width = 11,
-  height = 4.5,
-  units = "in",
-  dpi = 1200
-)
-
-ggsave(
-  filename = "output/figures/plot_workplace_figure.png",
-  plot = plot_workplace,
-  width = 11,
-  height = 5,
-  units = "in",
-  dpi = 1200
-)
-
-
-
-
 ## ----------------------------------------------------------------------------
 
-
-# Source: https://r-graph-gallery.com/ 
 
 ## Step 7 (SOCIAL AND CONTEXTUAL SETTINGS): Create a stacked bar chart
 
@@ -4940,31 +3901,8 @@ plot_support_conditions
 
 
 
-# 13. Save the figure as PNG ----------------------------------------------
-ggsave(
-  filename = "output/figures/plot_social_influence_figure.png",
-  plot = plot_social_influence,
-  width = 11,
-  height = 4.5,
-  units = "in",
-  dpi = 1200
-)
-
-ggsave(
-  filename = "output/figures/plot_support_conditions_figure.png",
-  plot = plot_support_conditions,
-  width = 10,
-  height = 4,
-  units = "in",
-  dpi = 1200
-)
-
-
-
 ## ----------------------------------------------------------------------------
 
-
-# Source: https://r-graph-gallery.com/ 
 
 ## Step 8 (ORGANIZATIONAL AND INDIVIDUAL READINESS): Create a stacked bar chart
 
@@ -5179,32 +4117,8 @@ plot_individual_readiness
 
 
 
-# 13. Save the figure as PNG ----------------------------------------------
-ggsave(
-  filename = "output/figures/plot_organizational_readiness_figure.png",
-  plot = plot_organizational_readiness,
-  width = 11,
-  height = 5,
-  units = "in",
-  dpi = 1200
-)
-
-ggsave(
-  filename = "output/figures/plot_individual_readiness_figure.png",
-  plot = plot_individual_readiness,
-  width = 10,
-  height = 4.5,
-  units = "in",
-  dpi = 1200
-)
-
-
-
-
 ## ----------------------------------------------------------------------------
 
-
-# Source: https://r-graph-gallery.com/ 
 
 ## Step 9 (ADAPTABILITY AND RESILIENCE): Create a stacked bar chart
 
@@ -5416,32 +4330,8 @@ plot_resilience <- make_plot(
 plot_resilience
 
 
-
-# 13. Save the figure as PNG -----------------------------------------------
-ggsave(
-  filename = "output/figures/plot_adaptability_figure.png",
-  plot = plot_adaptability,
-  width = 10,
-  height = 4,
-  units = "in",
-  dpi = 1200
-)
-
-ggsave(
-  filename = "output/figures/plot_resilience_figure.png",
-  plot = plot_resilience,
-  width = 10,
-  height = 4,
-  units = "in",
-  dpi = 1200
-)
-
-
-
 ## ----------------------------------------------------------------------------
 
-
-# Source: https://r-graph-gallery.com/ 
 
 ## Step 10 (AI AND YOUR WORK EXPERIENCE): Create a stacked bar chart
 
@@ -5658,32 +4548,8 @@ plot_employee_experience
 
 
 
-# 13. Save the figure as PNG -----------------------------------------------
-ggsave(
-  filename = "output/figures/plot_employment_governance_figure.png",
-  plot = plot_employment_governance,
-  width = 11,
-  height = 4.5,
-  units = "in",
-  dpi = 1200
-)
-
-ggsave(
-  filename = "output/figures/plot_employee_experience_figure.png",
-  plot = plot_employee_experience,
-  width = 11,
-  height = 4.5,
-  units = "in",
-  dpi = 1200
-)
-
-
-
-
 ## ----------------------------------------------------------------------------
 
-
-# Source: https://r-graph-gallery.com/ 
 
 ## Step 11 (OUTCOMES OF USING AI TOOLS): Create a stacked bar chart
 
@@ -5893,25 +4759,6 @@ plot_quality_accuracy <- make_plot_long(
 plot_quality_accuracy
 
 
-# 13. Save the figure as PNG -----------------------------------------------
-ggsave(
-  filename = "output/figures/plot_efficiency_workload_figure.png",
-  plot = plot_efficiency_workload,
-  width = 10,
-  height = 4,
-  units = "in",
-  dpi = 1200
-)
-
-ggsave(
-  filename = "output/figures/plot_quality_accuracy_figure.png",
-  plot = plot_quality_accuracy,
-  width = 10,
-  height = 3.5,
-  units = "in",
-  dpi = 1200
-)
-
 
 
 # 1. Create the data set ---------------------------------------------------
@@ -6115,27 +4962,6 @@ plot_transparency_accountability <- make_plot_long(
   "AI governance"
 )
 plot_transparency_accountability
-
-
-# 13. Save the figure as PNG ----------------------------------------------
-ggsave(
-  filename = "output/figures/plot_citizen_stakeholder_involvement_figure.png",
-  plot = plot_citizen_stakeholder_involvement,
-  width = 10,
-  height = 3,
-  units = "in",
-  dpi = 1200
-)
-
-ggsave(
-  filename = "output/figures/plot_transparency_accountability_figure.png",
-  plot = plot_transparency_accountability,
-  width = 10,
-  height = 4,
-  units = "in",
-  dpi = 1200
-)
-
 
 
 
@@ -6345,31 +5171,8 @@ plot_legal_compliance
 
 
 
-# 13. Save the figure as PNG -----------------------------------------------
-ggsave(
-  filename = "output/figures/plot_transparency_disclosure_figure.png",
-  plot = plot_transparency_disclosure,
-  width = 11,
-  height = 4,
-  units = "in",
-  dpi = 1200
-)
-
-ggsave(
-  filename = "output/figures/plot_legal_compliance_figure.png",
-  plot = plot_legal_compliance,
-  width = 11,
-  height = 3.5,
-  units = "in",
-  dpi = 1200
-)
-
-
 
 ## ----------------------------------------------------------------------------
-
-
-# Source: https://r-graph-gallery.com/ 
 
 ## Step 12 (NON-USERS’ PERSPECTIVES): Create a stacked bar chart
 
@@ -6746,31 +5549,8 @@ plot_organizational_professional_barriers <- make_plot_barriers(
 plot_organizational_professional_barriers
 
 
-# 13. Save the figure as PNG --------------------------------------------
-ggsave(
-  filename = "output/figures/plot_skills_trust_barriers_figure.png",
-  plot = plot_skills_trust_barriers,
-  width = 11,
-  height = 4,
-  units = "in",
-  dpi = 1200
-)
-
-ggsave(
-  filename = "output/figures/plot_organizational_professional_barriers_figure.png",
-  plot = plot_organizational_professional_barriers,
-  width = 11,
-  height = 4.5,
-  units = "in",
-  dpi = 1200
-)
-
-
 
 ## ----------------------------------------------------------------------------
-
-
-# Source: https://r-graph-gallery.com/ 
 
 ## Step 13 (GENERAL REFLECTIONS): Create a pie chart
 
@@ -6929,22 +5709,1227 @@ open_ended <- ggplot(theme_pie, aes(x = 0.75, y = Count, fill = Theme)) +
 
 open_ended
 
- 
-# Save the figure as PNG
-ggsave(
-  filename = "output/figures/open_ended_figure.png",
-  plot = open_ended,
-  width = 12,
-  height = 7,
-  units = "in",
-  bg = "white",
-  dpi = 1200
+
+# ===========================================================================
+# EXTRA --> FIGURES WIHTH IMPROVED DESIGN AND A 4-PANEL FIGURE
+# ==========================================================================
+
+
+# Manually improve line breaks for long questions
+format_question <- function(x) {
+  
+  x <- as.character(x)
+  
+  dplyr::case_when(
+    
+    # Expected future use
+    x == "I will try to use AI tools in my work whenever I have a chance" ~
+      "I will try to use AI tools in my work\nwhenever I have a chance",
+    
+    x == "I think adding AI tools to my work is a good idea" ~
+      "I think adding AI tools to my work\nis a good idea",
+    
+    x == "I support the use of AI tools in my own work" ~
+      "I support the use of AI tools\nin my own work",
+    
+    x == "I plan to use AI tools often in my daily work" ~
+      "I plan to use AI tools often\nin my daily work",
+    
+    x == "I intend to keep using AI tools in my work in the future" ~
+      "I intend to keep using AI tools\nin my work in the future",
+    
+    # Perceived performance impact
+    x == "AI tools make the quality of my work better" ~
+      "AI tools make the quality of\nmy work better",
+    
+    x == "AI tools help me reach important goals at work" ~
+      "AI tools help me reach important\ngoals at work",
+    
+    x == "AI tools help me finish my work tasks faster" ~
+      "AI tools help me finish\nmy work tasks faster",
+    
+    x == "AI tools help me come up with more creative ideas in my work" ~
+      "AI tools help me come up with more\ncreative ideas in my work",
+    
+    x == "AI tools are helpful for my work" ~
+      "AI tools are helpful\nfor my work",
+    
+    # AI knowledge and confidence
+    x == "Using AI tools at work doesn't take much mental effort" ~
+      "Using AI tools at work doesn't take\nmuch mental effort",
+    
+    x == "It is easy for me to learn how to use AI tools" ~
+      "It is easy for me to learn\nhow to use AI tools",
+    
+    x == "I understand how to use AI tools" ~
+      "I understand how\nto use AI tools",
+    
+    x == "I feel sure that I can become good at using AI tools" ~
+      "I feel sure that I can become good\nat using AI tools",
+    
+    x == "AI tools are easy for me to use at work" ~
+      "AI tools are easy for me\nto use at work",
+    
+    # Training and organizational support
+    x == "In our organization, we are provided with opportunities to learn new technological skills due to changes related to AI" ~
+      "In our organization, we are provided with opportunities\nto learn new technological skills due to changes\nrelated to AI",
+    
+    x == "In our organization, we are provided with opportunities to learn new soft skills due to changes related to AI" ~
+      "In our organization, we are provided with opportunities\nto learn new soft skills due to changes\nrelated to AI",
+    
+    x == "In our organization, we are provided with opportunities to learn about the risks of using AI tools as part of developing a critical approach to their use" ~
+      "In our organization, we are provided with opportunities\nto learn about the risks of using AI tools as part of\ndeveloping a critical approach to their use",
+    
+    x == "I have attended enough training to use AI tools at work" ~
+      "I have attended enough training\nto use AI tools at work",
+    
+    x == "I am worried that some employees could be left out if they do not get training on AI" ~
+      "I am worried that some employees could be left out\nif they do not receive training on AI",
+    
+    # Trust, transparency, risk awareness and accuracy
+    x == "I believe that the results produced by AI tools are accurate" ~
+      "I believe that the results \nproduced by AI tools are accurate",
+    
+    x == "I believe that AI tools provide reliable support for our organization’s operations" ~
+      "I believe that AI tools provide reliable\nsupport for our organization’s operations",
+    
+    x == "I believe that AI tools provide reliable support for our organization's operations" ~
+      "I believe that AI tools provide reliable\nsupport for our organization's operations",
+    
+    x == "I believe that AI tools operate transparently" ~
+      "I believe that AI tools\noperate transparently",
+    
+    x == "I am familiar with the risks associated with using AI tools at work" ~
+      "I am familiar with the risks \nassociated with using AI tools at work",
+    
+    # Privacy, data protection and responsible data use
+    x == "I feel comfortable providing data to AI tools" ~
+      "I feel comfortable providing\ndata to AI tools",
+    
+    x == "I believe that AI tools protect the data I provide to them" ~
+      "I believe that AI tools protect\nthe data I provide to them",
+    
+    x == "I believe that AI tools in our organization do not unjustifiably infringe on employees' privacy" ~
+      "I believe that AI tools in our organization do not\nunjustifiably infringe on employees' privacy",
+    
+    x == "I believe that AI tools in our organization do not unjustifiably infringe on employees’ privacy" ~
+      "I believe that AI tools in our organization do not\nunjustifiably infringe on employees’ privacy",
+    
+    x == "I believe that AI tools handle users’ data responsibly" ~
+      "I believe that AI tools handle\nusers’ data responsibly",
+    
+    x == "I believe that AI tools handle users' data responsibly" ~
+      "I believe that AI tools handle\nusers' data responsibly",
+    
+    x == "I am aware of the risks of data misuse when using AI tools" ~
+      "I am aware of the risks of data misuse\nwhen using AI tools",
+    
+    x == "I am aware of how AI tools collect and use data" ~
+      "I am aware of how AI tools\ncollect and use data",
+    
+    # Fairness, intellectual property and ethical standards
+    x == "I believe that AI tools treat users fairly and without discrimination" ~
+      "I believe that AI tools treat users fairly\nand without discrimination",
+    
+    x == "I believe that AI tools do not violate intellectual property rights" ~
+      "I believe that AI tools do not violate\nintellectual property rights",
+    
+    x == "I believe that AI tools adhere to ethical standards" ~
+      "I believe that AI tools adhere\nto ethical standards",
+    
+    # Concerns about AI use in society and public services
+    x == "The use of AI tools could hinder the development of key competencies among public employees" ~
+      "The use of AI tools could hinder the development of\nkey competencies among public employees",
+    
+    x == "I am concerned that public employees may become overly reliant on AI tools" ~
+      "I am concerned that public employees may become\noverly reliant on AI tools",
+    
+    x == "I am concerned that citizens may become overly reliant on AI tools" ~
+      "I am concerned that citizens may become\noverly reliant on AI tools",
+    
+    x == "I am concerned that AI tools could widen the digital gap among public employees" ~
+      "I am concerned that AI tools could widen the\ndigital gap among public employees",
+    
+    x == "I am concerned that AI tools could widen the digital gap among citizens" ~
+      "I am concerned that AI tools could widen the\ndigital gap among citizens",
+    
+    x == "AI tools could reduce opportunities for direct interaction between public employees and citizens" ~
+      "AI tools could reduce opportunities for direct interaction\nbetween public employees and citizens",
+    
+    # Concerns about AI use in the workplace
+    x == "I am concerned that relying on AI tool outputs could lead to incorrect decisions at work" ~
+      "I am concerned that relying on AI tool outputs could\nlead to incorrect decisions at work",
+    
+    x == "I am concerned that my work is being monitored through the AI tools I use" ~
+      "I am concerned that my work is being monitored through\nthe AI tools I use",
+    
+    x == "I am concerned that AI tools reduce my autonomy at work" ~
+      "I am concerned that AI tools\nreduce my autonomy at work",
+    
+    x == "I am concerned that AI tools diminish the value of my professional work" ~
+      "I am concerned that AI tools diminish the value of\nmy professional work",
+    
+    x == "I am concerned that AI tools could lead to discrimination" ~
+      "I am concerned that AI tools\ncould lead to discrimination",
+    
+    x == "AI tools can produce false information, known as hallucinations" ~
+      "AI tools can produce false information,\nknown as hallucinations",
+    
+    x == "AI tools can exhibit linguistic or cultural biases in their outputs" ~
+      "AI tools can exhibit linguistic or cultural biases\nin their outputs",
+    
+    # Social influence and acceptance
+    x == "People whose opinions I value support my use of AI tools at work" ~
+      "People whose opinions I value support \nmy use of AI tools at work",
+    
+    x == "People who influence my work decisions believe that I should use AI tools" ~
+      "People who influence my work decisions \nbelieve that I should use AI tools",
+    
+    x == "People who are important to me believe that I should use AI tools at work" ~
+      "People who are important to me believe \nthat I should use AI tools at work",
+    
+    x == "My coworkers generally support the use of AI tools" ~
+      "My coworkers generally \nsupport the use of AI tools",
+    
+    x == "In my workplace, using AI tools is seen as something positive" ~
+      "In my workplace, using AI tools \nis seen as something positive",
+    
+    x == "In my wider community, the use of AI tools is generally accepted" ~
+      "In my wider community, the use of \nAI tools is generally accepted",
+    
+    # Resources, knowledge, compatibility and support
+    x == "In our organization, we have sufficient support for using AI tools at work" ~
+      "In our organization, we have sufficient \nsupport for using AI tools at work",
+    
+    x == "If I needed help using AI tools, a colleague would be available to assist me" ~
+      "If I needed help using AI tools, a colleague\nwould be available to assist me",
+    
+    x == "I have the resources I need to use AI tools in my work" ~
+      "I have the resources I need \nto use AI tools in my work",
+    
+    x == "I have the knowledge I need to use AI tools well" ~
+      "I have the knowledge I need\nto use AI tools well",
+    
+    x == "AI tools fit well with how I normally do my work" ~
+      "AI tools fit well with \nhow I normally do my work",
+    
+    # Organizational readiness
+    x == "In our organization, we have the opportunity to learn about implemented AI solutions and their design" ~
+      "In our organization, we have the opportunity to learn\nabout implemented AI solutions and their design",
+    
+    x == "In our organization, we have sufficient financial resources to purchase and maintain AI tools" ~
+      "In our organization, we have sufficient financial\nresources to purchase and maintain AI tools",
+    
+    x == "In our organization, we have opportunities to learn the latest ways to work with AI tools" ~
+      "In our organization, we have opportunities to learn\nthe latest ways to work with AI tools",
+    
+    x == "In our organization, the organizational structure is adapted to keep up with AI-based innovations" ~
+      "In our organization, the organizational structure is\nadapted to keep up with AI-based innovations",
+    
+    x == "In our organization, the ICT infrastructure is regularly updated to better leverage AI tools" ~
+      "In our organization, the ICT infrastructure is\nregularly updated to better leverage AI tools",
+    
+    x == "In our organization, new ideas are supported" ~
+      "In our organization,\nnew ideas are supported",
+    
+    x == "In our organization, employees are involved in the preparation and implementation of AI solutions" ~
+      "In our organization, employees are involved in the\npreparation and implementation of AI solutions",
+    
+    # Proactive individual use and exploration
+    x == "I try out AI tools to complete tasks more efficiently" ~
+      "I try out AI tools to complete tasks\nmore efficiently",
+    
+    x == "I proactively explore how AI tools can help me with my work" ~
+      "I proactively explore how AI tools can help\nme with my work",
+    
+    x == "I look for ways to use AI tools to improve my work" ~
+      "I look for ways to use AI tools\nto improve my work",
+    
+    x == "I identify possible problems with AI tools and try to solve them early" ~
+      "I identify possible problems with AI tools\nand try to solve them early",
+    
+    x == "I encourage my coworkers to try AI tools" ~
+      "I encourage my coworkers\nto try AI tools",
+    
+    x == "I am excited by exploring new possibilities for using AI" ~
+      "I am excited by exploring new possibilities\nfor using AI",
+    
+    # Adaptability
+    x == "I keep myself informed about how AI tools are used in my field" ~
+      "I keep myself informed about how AI tools are\nused in my field",
+    
+    x == "I can quickly get used to new AI tools at work" ~
+      "I can quickly get used to new AI tools\nat work",
+    
+    x == "I am open to changing how I work to use AI tools better" ~
+      "I am open to changing how I work\nto use AI tools better",
+    
+    x == "I actively search for training/information to improve my AI skills" ~
+      "I actively search for training or information\nto improve my AI skills",
+    
+    x == "AI allows me to be more flexible in my work tasks" ~
+      "AI allows me to be more flexible\nin my work tasks",
+    
+    # Resilience
+    x == "I stay calm when AI tools change how I work" ~
+      "I stay calm when AI tools\nchange how I work",
+    
+    x == "I manage stress well when learning or adjusting to AI tools" ~
+      "I manage stress well when learning\nor adjusting to AI tools",
+    
+    x == "I focus on finding solutions when AI tools do not work as expected" ~
+      "I focus on finding solutions when AI tools do\nnot work as expected",
+    
+    x == "I feel confident dealing with challenges related to AI at work" ~
+      "I feel confident dealing with challenges\nrelated to AI at work",
+    
+    x == "I can keep doing my job well even when AI tools bring uncertainty" ~
+      "I can keep doing my job well even when AI\ntools bring uncertainty",
+    
+    # Employment impacts and governance
+    x == "Trade unions are involved in decision-making regarding the use of AI in my organization" ~
+      "Trade unions are involved in decision-making regarding\nthe use of AI in my organization",
+    
+    x == "Our organization has established rules to protect employees from potential harm caused by AI" ~
+      "Our organization has established rules to protect\nemployees from potential harm caused by AI",
+    
+    x == "I believe that trade unions should have a greater role in shaping rules for the use of AI in the public sector" ~
+      "I believe that trade unions should have a greater role\nin shaping rules for AI use in the public sector",
+    
+    x == "I believe that AI will create new jobs" ~
+      "I believe that AI\nwill create new jobs",
+    
+    x == "I am worried that I could lose my job because AI is taking over tasks currently performed by humans" ~
+      "I am worried that I could lose my job because AI is\ntaking over tasks currently performed by humans",
+    
+    x == "AI tools have clearly changed the kind of work I do" ~
+      "AI tools have clearly changed\nthe kind of work I do",
+    
+    # Employee voice and workplace experiences
+    x == "My managers support using AI tools at work" ~
+      "My managers support using\nAI tools at work",
+    
+    x == "I would think about leaving my job if AI took over important parts of my work" ~
+      "I would think about leaving my job if AI took over\nimportant parts of my work",
+    
+    x == "I feel that my opinion matters when new technologies like AI are introduced at work" ~
+      "I feel that my opinion matters when new technologies\nlike AI are introduced at work",
+    
+    x == "I feel stressed by how fast AI tools are being introduced in my workplace" ~
+      "I feel stressed by how fast AI tools are being\nintroduced in my workplace",
+    
+    x == "I feel relaxed when using AI tools" ~
+      "I feel relaxed\nwhen using AI tools",
+    
+    x == "I avoid using AI tools because I am afraid of making a mistake that no one will notice" ~
+      "I avoid using AI tools because I am afraid of making a\nmistake that no one will notice",
+    
+    # Efficiency, workload reduction and task completion
+    x == "It takes a lot of time to check the results from AI tools" ~
+      "It takes a lot of time to check the results\nfrom AI tools",
+    
+    x == "AI tools lower the amount of manual work" ~
+      "AI tools lower the amount\nof manual work",
+    
+    x == "AI tools let us focus on more important tasks" ~
+      "AI tools let us focus\non more important tasks",
+    
+    x == "AI tools help us finish tasks faster overall" ~
+      "AI tools help us finish tasks\nfaster overall",
+    
+    x == "AI tools help save time on routine tasks" ~
+      "AI tools help save time\non routine tasks",
+    
+    # Quality, accuracy and problem detection
+    x == "AI tools reduce the quality of the final results" ~
+      "AI tools reduce the quality\nof the final results",
+    
+    x == "AI tools make our work more accurate" ~
+      "AI tools make our work\nmore accurate",
+    
+    x == "AI tools help us spot problems early" ~
+      "AI tools help us spot\nproblems early",
+    
+    x == "AI tools help reduce errors in our work" ~
+      "AI tools help reduce errors\nin our work",
+    
+    # Citizen feedback and stakeholder involvement
+    x == "AI tools reduce direct contact between citizens and public employees" ~
+      "AI tools reduce direct contact between citizens and\npublic employees",
+    
+    x == "AI tools make it easier for citizens to give feedback/make requests" ~
+      "AI tools make it easier for citizens to give\nfeedback or make requests",
+    
+    x == "AI tools help involve stakeholders in decision-making" ~
+      "AI tools help involve stakeholders\nin decision-making",
+    
+    # Transparency and organizational safeguards
+    x == "The use of AI tools is clearly documented" ~
+      "The use of AI tools\nis clearly documented",
+    
+    x == "Our organization has a system in place to verify the accuracy of results produced by AI tools" ~
+      "Our organization has a system in place to verify\nthe accuracy of results produced by AI tools",
+    
+    x == "Our organization has a system in place for reporting and resolving issues with AI tools" ~
+      "Our organization has a system in place for reporting\nand resolving issues with AI tools",
+    
+    x == "It is difficult to explain the final result when AI tools are used" ~
+      "It is difficult to explain the final result\nwhen AI tools are used",
+    
+    x == "It is clear who is responsible for decisions made with the help of AI tools" ~
+      "It is clear who is responsible for decisions made\nwith the help of AI tools",
+    
+    # Public disclosure and documentation
+    x == "We keep records of what prompts and instructions were given to AI tools" ~
+      "We keep records of what prompts and\ninstructions were given to AI tools",
+    
+    x == "The public does not always know if AI tools were used to influence a decision" ~
+      "The public does not always know if AI tools were used\nto influence a decision",
+    
+    x == "Stakeholders can access the data that our AI tools use" ~
+      "Stakeholders can access the data\nthat our AI tools use",
+    
+    x == "Citizens are notified in writing when AI tools are used in administrative decision-making" ~
+      "Citizens are notified in writing when AI tools are used\nin administrative decision-making",
+    
+    x == "AI-generated content is clearly labelled" ~
+      "AI-generated content\nis clearly labelled",
+    
+    # Legal compliance and citizens' rights
+    x == "When using AI tools, we protect the rights of citizens" ~
+      "When using AI tools, we protect\nthe rights of citizens",
+    
+    x == "We follow legal rules when using AI tools" ~
+      "We follow legal rules\nwhen using AI tools",
+    
+    x == "The use of AI tools in our organization complies with regulations protecting citizens' rights" ~
+      "The use of AI tools in our organization complies with\nregulations protecting citizens' rights",
+    
+    x == "The use of AI tools in our organization complies with regulations protecting citizens’ rights" ~
+      "The use of AI tools in our organization complies with\nregulations protecting citizens’ rights",
+    
+    x == "Because AI works in hidden ways (\"black box\"), it is hard to make sure it follows the law" ~
+      "Because AI works in hidden ways (\"black box\"), it is\nhard to make sure it follows the law",
+    
+    x == "Because AI works in hidden ways (“black box”), it is hard to make sure it follows the law" ~
+      "Because AI works in hidden ways (“black box”), it is\nhard to make sure it follows the law",
+    
+    # Leave all unmatched questions unchanged
+    TRUE ~ x
+  )
+}
+
+# Add the sample size (n) to the formatted question
+
+format_question_n <- function(question, n) {
+  
+  formatted_question <- format_question(as.character(question))
+  
+  paste0(
+    formatted_question,
+    " (n = ",
+    n,
+    ")"
+  )
+}
+
+
+# Create a diverging Likert plot
+
+make_plot_with <- function(
+    data,
+    plot_title,
+    question_spacing = 1.35
+) {
+  
+  response_levels <- c(
+    "Strongly disagree",
+    "Somewhat disagree",
+    "Undecided",
+    "Somewhat agree",
+    "Strongly agree"
+  )
+  
+  response_colours <- c(
+    "Strongly disagree" = "#C63D2F",
+    "Somewhat disagree" = "#E89C62",
+    "Undecided"         = "#D9D9D9",
+    "Somewhat agree"    = "#8BB8D9",
+    "Strongly agree"    = "#2F6C99"
+  )
+  
+  # Preserve the order of questions in the input data
+  question_order <- data |>
+    dplyr::distinct(Question) |>
+    dplyr::pull(Question)
+  
+  # Prepare one row per question and response category
+  plot_data <- data |>
+    dplyr::mutate(
+      Response = as.character(Response),
+      
+      Question_label = mapply(
+        format_question_n,
+        question = as.character(Question),
+        n = Question_n,
+        USE.NAMES = FALSE
+      )
+    ) |>
+    dplyr::select(
+      Question,
+      Question_label,
+      Question_n,
+      Response,
+      Percentage
+    ) |>
+    tidyr::complete(
+      Question,
+      Response = response_levels,
+      fill = list(Percentage = 0)
+    ) |>
+    dplyr::group_by(Question) |>
+    dplyr::mutate(
+      Question_n = dplyr::first(
+        stats::na.omit(Question_n)
+      ),
+      
+      Question_label = format_question_n(
+        dplyr::first(as.character(Question)),
+        dplyr::first(Question_n)
+      )
+    ) |>
+    dplyr::ungroup() |>
+    dplyr::mutate(
+      Response = factor(
+        Response,
+        levels = response_levels,
+        ordered = FALSE
+      )
+    ) |>
+    tidyr::pivot_wider(
+      names_from = Response,
+      values_from = Percentage,
+      values_fill = 0
+    )
+  
+  # Calculate the position of each diverging bar segment
+  segments <- plot_data |>
+    dplyr::rowwise() |>
+    dplyr::do({
+      x <- .
+      
+      neutral_half <- x[["Undecided"]] / 2
+      
+      tibble::tibble(
+        Question = x$Question,
+        Question_label = x$Question_label,
+        
+        Response = factor(
+          response_levels,
+          levels = response_levels,
+          ordered = FALSE
+        ),
+        
+        Percentage = c(
+          x[["Strongly disagree"]],
+          x[["Somewhat disagree"]],
+          x[["Undecided"]],
+          x[["Somewhat agree"]],
+          x[["Strongly agree"]]
+        ),
+        
+        xmin = c(
+          -(
+            x[["Strongly disagree"]] +
+              x[["Somewhat disagree"]] +
+              neutral_half
+          ),
+          -(x[["Somewhat disagree"]] + neutral_half),
+          -neutral_half,
+          neutral_half,
+          neutral_half + x[["Somewhat agree"]]
+        ),
+        
+        xmax = c(
+          -(x[["Somewhat disagree"]] + neutral_half),
+          -neutral_half,
+          neutral_half,
+          neutral_half + x[["Somewhat agree"]],
+          neutral_half +
+            x[["Somewhat agree"]] +
+            x[["Strongly agree"]]
+        )
+      )
+    }) |>
+    dplyr::ungroup() |>
+    dplyr::mutate(
+      # Keep the first question at the top
+      Question_label = factor(
+        Question_label,
+        levels = rev(
+          unique(
+            plot_data$Question_label[
+              match(question_order, plot_data$Question)
+            ]
+          )
+        )
+      ),
+      
+      # Same question spacing as the no-label version
+      y = as.numeric(Question_label) * question_spacing,
+      
+      # Percentage labels shown only when the segment is large enough
+      label = dplyr::if_else(
+        Percentage >= 5,
+        paste0(round(Percentage), "%"),
+        ""
+      ),
+      
+      # Place labels in the centre of each segment
+      label_x = dplyr::if_else(
+        Response == "Undecided",
+        0,
+        (xmin + xmax) / 2
+      )
+    )
+  
+  # Y-axis positions must exactly match the bar positions
+  y_breaks <- seq(
+    from = question_spacing,
+    by = question_spacing,
+    length.out = length(
+      levels(segments$Question_label)
+    )
+  )
+  
+  ggplot2::ggplot(segments) +
+    
+    ggplot2::geom_rect(
+      ggplot2::aes(
+        xmin = xmin,
+        xmax = xmax,
+        ymin = y - 0.35,
+        ymax = y + 0.35,
+        fill = Response
+      ),
+      colour = "white",
+      linewidth = 0.3
+    ) +
+    
+    ggplot2::geom_text(
+      ggplot2::aes(
+        x = label_x,
+        y = y,
+        label = label
+      ),
+      size = 2.8,
+      colour = "black",
+      family = "sans"
+    ) +
+    
+    ggplot2::geom_vline(
+      xintercept = 0,
+      colour = "grey45",
+      linewidth = 0.3
+    ) +
+    
+    ggplot2::scale_x_continuous(
+      limits = c(-100, 100),
+      breaks = seq(-100, 100, 50),
+      labels = function(x) {
+        paste0(abs(x), "%")
+      },
+      expand = ggplot2::expansion(
+        mult = c(0.01, 0.01)
+      )
+    ) +
+    
+    ggplot2::scale_y_continuous(
+      breaks = y_breaks,
+      labels = levels(
+        segments$Question_label
+      ),
+      expand = ggplot2::expansion(add = 0.5)
+    ) +
+    
+    ggplot2::scale_fill_manual(
+      values = response_colours,
+      breaks = response_levels,
+      drop = FALSE
+    ) +
+    
+    ggplot2::labs(
+      title = plot_title,
+      x = "Percentage of respondents",
+      y = NULL,
+      fill = NULL
+    ) +
+    
+    ggplot2::theme_classic(
+      base_size = 12,
+      base_family = "sans"
+    ) +
+    
+    ggplot2::theme(
+      plot.title = ggplot2::element_text(
+        face = "bold",
+        size = 13,
+        colour = "black",
+        hjust = 0.5,
+        margin = ggplot2::margin(b = 12)
+      ),
+      
+      axis.text.y = ggplot2::element_text(
+        size = 12,
+        colour = "black",
+        lineheight = 1,
+        margin = ggplot2::margin(r = 2)
+      ),
+      
+      axis.text.x = ggplot2::element_text(
+        size = 12,
+        colour = "black"
+      ),
+      
+      axis.title.x = ggplot2::element_text(
+        size = 12,
+        colour = "black",
+        margin = ggplot2::margin(t = 8)
+      ),
+      
+      axis.line.y = ggplot2::element_blank(),
+      axis.ticks.y = ggplot2::element_blank(),
+      
+      panel.grid.major = ggplot2::element_blank(),
+      panel.grid.minor = ggplot2::element_blank(),
+      
+      legend.position = "bottom",
+      legend.direction = "horizontal",
+      
+      legend.text = ggplot2::element_text(
+        size = 12,
+        colour = "black"
+      ),
+      
+      legend.key.size = grid::unit(0.45, "cm"),
+      legend.spacing.x = grid::unit(0.15, "cm"),
+      legend.margin = ggplot2::margin(t = 10),
+      
+      plot.margin = ggplot2::margin(
+        t = 8,
+        r = 25,
+        b = 8,
+        l = 25
+      )
+    ) +
+    
+    ggplot2::guides(
+      fill = ggplot2::guide_legend(
+        nrow = 1,
+        byrow = TRUE
+      )
+    )
+}
+
+
+### WITH LABELS ###
+
+
+
+confidence_plot_with <- make_plot_with(
+  confidence_df,
+  "AI knowledge and confidence"
 )
+confidence_plot_with
+
+
+
+plot_social_influence_with <- make_plot_with(
+  social_influence,
+  "Social influence"
+)
+plot_social_influence_with
+
+
+learning_support_plot_with <- make_plot_with(
+  training_support_df,
+  "Training and organizational support"
+)
+learning_support_plot_with
+
+
+privacy_data_plot_with <- make_plot_with(
+  privacy_data,
+  "Privacy, fairness, and responsible AI use"
+)
+privacy_data_plot_with
+
+
+
+
+
+plot_societal_with <- make_plot_with(
+  concern_societal,
+  "Concerns about AI use in society and public services"
+)
+plot_societal_with
+
+
+plot_workplace_with <- make_plot_with(
+  concern_workplace,
+  "Concerns about AI use in the workplace"
+)
+plot_workplace_with
+
+
+plot_organizational_readiness_with <- make_plot_with(
+  organizational_readiness,
+  "Organizational readiness for adopting and implementing AI"
+)
+plot_organizational_readiness_with
+
+
+plot_individual_readiness_with <- make_plot_with(
+  individual_readiness,
+  "Proactive individual use and exploration of AI tools"
+)
+plot_individual_readiness_with
+
+
+
+
+plot_adaptability_with <- make_plot_with(
+  adaptability,
+  "Adaptability to AI tools and changing work practices"
+)
+plot_adaptability_with
+
+
+plot_resilience_with <- make_plot_with(
+  resilience,
+  "Resilience when facing AI-related change and uncertainty"
+)
+plot_resilience_with
+
+
+plot_employment_governance_with <- make_plot_with(
+  employment_governance,
+  "Employment impacts, governance, and protection from AI-related harm"
+)
+plot_employment_governance_with
+
+
+plot_employee_experience_with <- make_plot_with(
+  employee_experience,
+  "Employee voice, managerial support, and experiences of using AI"
+)
+plot_employee_experience_with
+
+
+
+
+plot_efficiency_workload_with <- make_plot_with(
+  efficiency_workload,
+  "Efficiency, workload reduction, and task completion"
+)
+plot_efficiency_workload_with
+
+
+plot_quality_accuracy_with <- make_plot_with(
+  quality_accuracy,
+  "Quality, accuracy, and early problem detection"
+)
+plot_quality_accuracy_with
+
+
+plot_citizen_stakeholder_involvement_with <- make_plot_with(
+  citizen_stakeholder_involvement,
+  "Citizen feedback, contact, and stakeholder involvement"
+)
+plot_citizen_stakeholder_involvement_with
+
+
+plot_transparency_accountability_with <- make_plot_with(
+  transparency_accountability,
+  "Transparency, accountability, and organizational safeguards"
+)
+plot_transparency_accountability_with
+
+
+
+
+plot_transparency_disclosure_with <- make_plot_with(
+  transparency_disclosure,
+  "Transparency, public disclosure, and documentation of AI use"
+)
+plot_transparency_disclosure_with
+
+
+plot_legal_compliance_with <- make_plot_with(
+  legal_compliance,
+  "Legal compliance and protection of citizens’ rights"
+)
+plot_legal_compliance_test
+
+
+
+
+# ------------------------------------------------------------------------
+
+##### Without sample sizes, for use in a four-panel figure #######
+
+make_plot_test_no_labels <- function(
+    data,
+    plot_title,
+    question_spacing = 1.35
+) {
+  
+  response_levels <- c(
+    "Strongly disagree",
+    "Somewhat disagree",
+    "Undecided",
+    "Somewhat agree",
+    "Strongly agree"
+  )
+  
+  response_colours <- c(
+    "Strongly disagree" = "#C63D2F",
+    "Somewhat disagree" = "#E89C62",
+    "Undecided"         = "#D9D9D9",
+    "Somewhat agree"    = "#8BB8D9",
+    "Strongly agree"    = "#2F6C99"
+  )
+  
+  # Preserve the order of questions in the input data
+  question_order <- data |>
+    dplyr::distinct(Question) |>
+    dplyr::pull(Question)
+  
+  # Prepare one row per question and response category
+  plot_data <- data |>
+    dplyr::mutate(
+      Response = as.character(Response),
+      
+      Question_label = format_question(
+        as.character(Question)
+      )
+    ) |>
+    dplyr::select(
+      Question,
+      Question_label,
+      Response,
+      Percentage
+    ) |>
+    tidyr::complete(
+      Question,
+      Response = response_levels,
+      fill = list(Percentage = 0)
+    ) |>
+    dplyr::group_by(Question) |>
+    dplyr::mutate(
+      Question_label = format_question(
+        dplyr::first(as.character(Question))
+      )
+    ) |>
+    dplyr::ungroup() |>
+    dplyr::mutate(
+      Response = factor(
+        Response,
+        levels = response_levels,
+        ordered = FALSE
+      )
+    ) |>
+    tidyr::pivot_wider(
+      names_from = Response,
+      values_from = Percentage,
+      values_fill = 0
+    )
+  
+  # Calculate the position of each diverging bar segment
+  segments <- plot_data |>
+    dplyr::rowwise() |>
+    dplyr::do({
+      x <- .
+      
+      neutral_half <- x[["Undecided"]] / 2
+      
+      tibble::tibble(
+        Question = x$Question,
+        Question_label = x$Question_label,
+        
+        Response = factor(
+          response_levels,
+          levels = response_levels,
+          ordered = FALSE
+        ),
+        
+        Percentage = c(
+          x[["Strongly disagree"]],
+          x[["Somewhat disagree"]],
+          x[["Undecided"]],
+          x[["Somewhat agree"]],
+          x[["Strongly agree"]]
+        ),
+        
+        xmin = c(
+          -(
+            x[["Strongly disagree"]] +
+              x[["Somewhat disagree"]] +
+              neutral_half
+          ),
+          -(x[["Somewhat disagree"]] + neutral_half),
+          -neutral_half,
+          neutral_half,
+          neutral_half + x[["Somewhat agree"]]
+        ),
+        
+        xmax = c(
+          -(x[["Somewhat disagree"]] + neutral_half),
+          -neutral_half,
+          neutral_half,
+          neutral_half + x[["Somewhat agree"]],
+          neutral_half +
+            x[["Somewhat agree"]] +
+            x[["Strongly agree"]]
+        )
+      )
+    }) |>
+    dplyr::ungroup() |>
+    dplyr::mutate(
+      # Keep the first question at the top
+      Question_label = factor(
+        Question_label,
+        levels = rev(
+          unique(
+            plot_data$Question_label[
+              match(question_order, plot_data$Question)
+            ]
+          )
+        )
+      ),
+      
+      # Increase distance between question centres
+      # without changing bar thickness
+      y = as.numeric(Question_label) * 1.4
+    )
+  
+  # Y-axis positions must match the spaced question centres
+  y_breaks <- seq(
+    from = question_spacing,
+    by = question_spacing,
+    length.out = length(levels(segments$Question_label))
+  )
+  
+  ggplot2::ggplot(segments) +
+    
+    ggplot2::geom_rect(
+      ggplot2::aes(
+        xmin = xmin,
+        xmax = xmax,
+        
+        # Original bar thickness retained
+        ymin = y - 0.35,
+        ymax = y + 0.35,
+        
+        fill = Response
+      ),
+      colour = "white",
+      linewidth = 0.3
+    ) +
+    
+    ggplot2::geom_vline(
+      xintercept = 0,
+      colour = "grey45",
+      linewidth = 0.3
+    ) +
+    
+    ggplot2::scale_x_continuous(
+      limits = c(-100, 100),
+      breaks = seq(-100, 100, 50),
+      labels = function(x) paste0(abs(x), "%"),
+      expand = ggplot2::expansion(
+        mult = c(0.01, 0.01)
+      )
+    ) +
+    
+    ggplot2::scale_y_continuous(
+      breaks = y_breaks,
+      labels = levels(segments$Question_label),
+      expand = ggplot2::expansion(add = 0.5)
+    ) +
+    
+    ggplot2::scale_fill_manual(
+      values = response_colours,
+      breaks = response_levels,
+      drop = FALSE
+    ) +
+    
+    ggplot2::labs(
+      title = plot_title,
+      x = "Percentage of respondents",
+      y = NULL,
+      fill = NULL
+    ) +
+    
+    ggplot2::theme_classic(
+      base_size = 12,
+      base_family = "sans"
+    ) +
+    
+    ggplot2::theme(
+      plot.title = ggplot2::element_text(
+        face = "bold",
+        size = 13,
+        colour = "black",
+        hjust = 0.5,
+        margin = ggplot2::margin(b = 12)
+      ),
+      
+      axis.text.y = ggplot2::element_text(
+        size = 12,
+        colour = "black",
+        lineheight = 1,
+        margin = ggplot2::margin(r = 2)
+      ),
+      
+      axis.text.x = ggplot2::element_text(
+        size = 12,
+        colour = "black"
+      ),
+      
+      axis.title.x = ggplot2::element_text(
+        size = 12,
+        colour = "black",
+        margin = ggplot2::margin(t = 8)
+      ),
+      
+      axis.line.y = ggplot2::element_blank(),
+      axis.ticks.y = ggplot2::element_blank(),
+      
+      panel.grid.major = ggplot2::element_blank(),
+      panel.grid.minor = ggplot2::element_blank(),
+      
+      legend.position = "bottom",
+      legend.direction = "horizontal",
+      
+      legend.text = ggplot2::element_text(
+        size = 12,
+        colour = "black"
+      ),
+      
+      legend.key.size = grid::unit(0.45, "cm"),
+      legend.spacing.x = grid::unit(0.15, "cm"),
+      legend.margin = ggplot2::margin(t = 10),
+      
+      plot.margin = ggplot2::margin(
+        t = 8,
+        r = 25,
+        b = 8,
+        l = 25
+      )
+    ) +
+    
+    ggplot2::guides(
+      fill = ggplot2::guide_legend(
+        nrow = 1,
+        byrow = TRUE
+      )
+    )
+}
+
+
+
+
+# Plot with no sample size
+
+future_plot_test <- make_plot_test_no_labels(
+  future_all,
+  "Expected future use"
+)
+future_plot_test
+
+
+performance_plot_test <- make_plot_test_no_labels(
+  performance_all,
+  "Perceived performance impact"
+)
+performance_plot_test
+
+
+confidence_plot_test <- make_plot_test_no_labels(
+  confidence_df,
+  "AI knowledge and confidence"
+)
+confidence_plot_test
+
+
+plot_social_influence_test <- make_plot_test_no_labels(
+  social_influence,
+  "Social influence"
+)
+plot_social_influence_test
+
+
+plot_support_conditions_test <- make_plot_test_no_labels(
+  social_support_conditions,
+  "Resources and capability"
+)
+plot_support_conditions_test
+
+
+trust_accuracy_plot_test <- make_plot_test_no_labels(
+  trust_accuracy,
+  "Trust in AI"
+)
+trust_accuracy_plot_test
+
+
+
+
+### COMBINE 1-4) #####
+
+combined_plot_1_4 <-
+  (
+    future_plot_test | performance_plot_test
+  )  /
+  (
+    plot_support_conditions_test | trust_accuracy_plot_test
+  ) +
+  plot_layout(
+    widths = c(1.3, 1.3),
+    guides = "collect"
+  ) +
+  plot_annotation(
+    tag_levels = "A"
+  ) &
+  theme(
+    legend.position = "bottom",
+    legend.direction = "horizontal",
+    
+    plot.margin = margin(
+      t = 12,
+      r = 20,
+      b = 12,
+      l = 20
+    ),
+    
+    plot.tag = element_text(
+      family = "sans",
+      face = "bold",
+      size = 13
+    ),
+    plot.tag.position = c(0.02, 0.98)
+  )
+
+combined_plot_1_4
+
+
+
 
 
 
 # =======================================================================================
-# 2. Data analysis - SECTION 2-11 + NON-USERS’ PERSPECTIVES
+# 2. Statistical analysis - SECTION 2-11 + NON-USERS’ PERSPECTIVES
 # =======================================================================================
 
 # (AI users): Create descriptive table
@@ -7528,16 +7513,6 @@ plot_constructs <- ggplot(
 plot_constructs
 
 
-# Save the figure as PNG 
-ggsave(
-  filename = "output/figures/1_plot_constructs_figure.png",
-  plot = plot_constructs,
-  width = 15,
-  height = 8,
-  dpi = 1200
-)
-
-
 
 
 # 6. Reliability plot ------------------------------------------------------
@@ -7606,14 +7581,6 @@ plot_reliability <- ggplot(
 plot_reliability
 
 
-# Save the figure as PNG 
-ggsave(
-  filename = "output/figures/2_plot_reliability_figure.png",
-  plot = plot_reliability,
-  width = 10,
-  height = 7,
-  dpi = 1200
-)
 
 
 # 7. Combine plots ---------------------------------------------------------
@@ -7669,15 +7636,6 @@ combined_plot <-
 
 combined_plot
     
-
-# Save the figure as PNG 
-ggsave(
-  filename = "output/figures/3_combined_plot_figure.png",
-  plot = combined_plot,
-  width = 15,
-  height = 7,
-  dpi = 1200
-)
 
 
 
@@ -7815,7 +7773,7 @@ correlation_triangle <- correlation_long %>%
 
 # Optional check: this must be greater than zero
 nrow(correlation_triangle)
-[1] 78
+
 
 
 # -------------------------------------------------------------
@@ -8073,20 +8031,6 @@ correlation_figure <-
   )
 
 correlation_figure
-
-# -------------------------------------------------------------
-# 9. Save figure xxxxxx
-# -------------------------------------------------------------
-
-# Save the figure as PNG 
-ggsave(
-  filename = "output/figures/correlation_figure_figure.png",
-  plot = correlation_figure,
-  width = 14,
-  height = 7,
-  dpi = 1200
-)
-
 
 
 
